@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InovaShare</title>
+
+<style>
+body { font-family: Arial; background:#0f172a; color:white; margin:0; }
+header { background:#1e293b; padding:20px; text-align:center; font-size:24px; }
+.container { padding:20px; max-width:800px; margin:auto; }
+input, textarea { width:100%; margin:5px 0; padding:10px; border-radius:8px; border:none; }
+button { padding:10px; border:none; border-radius:8px; background:#22c55e; color:white; font-weight:bold; cursor:pointer; }
+.card { background:#1e293b; padding:15px; border-radius:10px; margin-top:15px; }
+img { max-width:100%; border-radius:10px; }
+iframe { width:100%; height:200px; border:none; border-radius:10px; }
+</style>
+</head>
+
+<body>
+
+<header>🌍 InovaShare</header>
+
+<div class="container">
+
+<h2>Publicar Produto</h2>
+
+<input id="nome" placeholder="Nome do produto">
+<textarea id="descricao" placeholder="Descrição"></textarea>
+<input id="ods" placeholder="ODS (1 a 17)">
+<input id="imagem" placeholder="Link da imagem (opcional)">
+<input id="video" placeholder="Link do YouTube (opcional)">
+<button onclick="publicar()">Publicar</button>
+
+<h2>Produtos</h2>
+<div id="lista-produtos"></div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// 🔥 SEU FIREBASE (já configurado)
+const firebaseConfig = {
+  apiKey: "AIzaSyCC_CJs4diOsCTvLNIxHts2nhiDAm_3yuM",
+  authDomain: "inovashare-c1202.firebaseapp.com",
+  projectId: "inovashare-c1202",
+  storageBucket: "inovashare-c1202.firebasestorage.app",
+  messagingSenderId: "627179209490",
+  appId: "1:627179209490:web:60ab0c0e3c3c5740cc29cb"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 🚀 PUBLICAR PRODUTO
+window.publicar = async function() {
+  const produto = {
+    nome: document.getElementById("nome").value,
+    descricao: document.getElementById("descricao").value,
+    ods: document.getElementById("ods").value,
+    imagem: document.getElementById("imagem").value,
+    video: document.getElementById("video").value
+  };
+
+  await addDoc(collection(db, "produtos"), produto);
+  alert("Produto publicado pra todo mundo 😳🔥");
+
+  carregarProdutos();
+};
+
+// 📦 CARREGAR PRODUTOS
+async function carregarProdutos() {
+  const lista = document.getElementById("lista-produtos");
+  lista.innerHTML = "";
+
+  const querySnapshot = await getDocs(collection(db, "produtos"));
+  querySnapshot.forEach((doc) => {
+    const p = doc.data();
+
+    lista.innerHTML += `
+      <div class="card">
+        <h3>${p.nome}</h3>
+        <p>${p.descricao}</p>
+        <p><strong>ODS:</strong> ${p.ods}</p>
+        ${p.imagem ? `<img src="${p.imagem}">` : ""}
+        ${p.video ? `<iframe src="${p.video.replace("watch?v=", "embed/")}"></iframe>` : ""}
+      </div>
+    `;
+  });
+}
+
+carregarProdutos();
+</script>
+
+</body>
+</html>
